@@ -1,0 +1,161 @@
+<html>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+<script>
+const openModalButtons = document.querySelectorAll('[data-modal-target]')
+const closeModalButtons = document.querySelectorAll('[data-close-button]')
+const overlay = document.getElementById('overlay')
+
+openModalButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const modal = document.querySelector(button.dataset.modalTarget)
+    openModal(modal)
+  })
+})
+
+overlay.addEventListener('click', () => {
+  const modals = document.querySelectorAll('.modal.active')
+  modals.forEach(modal => {
+    closeModal(modal)
+  })
+})
+
+closeModalButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const modal = button.closest('.modal')
+    closeModal(modal)
+  })
+})
+
+function openModal(modal) {
+  if (modal == null) return
+  modal.classList.add('active')
+  overlay.classList.add('active')
+}
+
+function closeModal(modal) {
+  if (modal == null) return
+  modal.classList.remove('active')
+  overlay.classList.remove('active')
+}
+</script>
+
+  <head>
+    <!-- Moralis SDK code -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+    
+    <div class="header">
+      <img src="msafe.png" alt="logo" />
+      <h1>&nbsp IPFS File Transfer</h1><br><br><br><br><br>
+    </div>
+    </head>
+  
+  <div class="mainForm" id="mainForm">
+  <body>
+    
+    <!-- Login button voor metamask niet perse nodig, is automatisch nu -->
+    <!-- <button style=background-color:orangered id="btn-login">Login with Metamask</button><br><br> -->
+    <label for="name">Name:</label><br>
+    <input type="text" name="metadataName" id="metadataName"><br><br>
+    <label for="name">Message:</label><br>
+    <textarea name="metadataDescription" id="metadataDescription" cols="21" rows="5" placeholder="Type here"></textarea><br><br>
+    <!-- <input type="file" name="fileInput" id="fileInput"><br><br> -->
+    <!-- <button style=background-color:green onclick=send()>send</button> -->
+  
+    <div class="dropContainer" id="dropContainer">
+      Drop your file here
+    </div><br>
+      File:
+    <input type="file" name="fileInput" id="fileInput" /><br><br>
+
+    <button class="cybr-btn"onclick=send()>
+      Create hash<span aria-hidden>_</span>
+      <span aria-hidden class="cybr-btn__glitch">mSafe_</span>
+      <span aria-hidden class="cybr-btn__tag">V0.1</span>
+    </button>
+
+    <!-- <button style=background-color:green onclick=send()>Create hash</button> -->
+  </div>
+
+    <script>
+    dropContainer.ondragover = dropContainer.ondragenter = function(evt) {
+      evt.preventDefault();
+    };
+
+    dropContainer.ondrop = function(evt) {
+    // not compatible with IE :(
+      fileInput.files = evt.dataTransfer.files;
+
+    const dT = new DataTransfer();
+    dT.items.add(evt.dataTransfer.files[0]);
+    dT.items.add(evt.dataTransfer.files[3]);
+    fileInput.files = dT.files;
+
+    evt.preventDefault();
+  };
+
+      // connect to Moralis server
+      const serverUrl = "https://rkrmvjgt02d8.usemoralis.com:2053/server";
+      const appId = "5DKM4WVSui4kf4BaTRzeqRroHnwROLb5VJXtVAda";
+      Moralis.start({ serverUrl, appId });
+
+      Moralis.authenticate({signingMessage:"Login succesful"})
+
+      //login
+      login = async () => {
+        Moralis.Web3.authenticate().then(function (user){
+          console.log('logged in');
+      })
+    }
+
+      //upload
+      uploadFile = async () => {
+        const data = fileInput.files[0]
+        const file = new Moralis.File(data.name, data)
+        await file.saveIPFS();
+        return file.ipfs()
+        console.log(file.ipfs(), file.hash());
+      }
+
+      //upload metadata object
+      uploadMetadata = async (fileURL) =>{
+        
+        //niet perse nodig
+        // const name = document.getElementById('metadataName').value;
+        // const description = document.getElementById('metadataDescription').value;
+
+        const metadata = {
+          // optionele metadata, veroorzaakt meer clicks
+          // "name" : name,
+          // "description" : description,
+          "file" : fileURL
+        }
+
+        const file = new Moralis.File("file.json", {base64 : btoa(JSON.stringify(metadata))});
+        await file.saveIPFS();
+        
+        window.alert("Press okay to see the shareable link");
+        // document.write(file.ipfs());
+
+        var hashlink = file.ipfs();
+        document.body.appendChild(document.createElement('p'));
+        document.querySelector("body p:last-child").id = "jstext";
+        document.querySelector("#jstext").innerHTML = hashlink;
+  
+      }
+
+      //function send
+      send = async () => {
+        const document = await uploadFile();
+        await uploadMetadata(document);
+      }
+
+    </script>
+
+  </body>
+</html>
