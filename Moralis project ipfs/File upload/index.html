@@ -1,161 +1,193 @@
 <html>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-
-<script>
-const openModalButtons = document.querySelectorAll('[data-modal-target]')
-const closeModalButtons = document.querySelectorAll('[data-close-button]')
-const overlay = document.getElementById('overlay')
-
-openModalButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const modal = document.querySelector(button.dataset.modalTarget)
-    openModal(modal)
-  })
-})
-
-overlay.addEventListener('click', () => {
-  const modals = document.querySelectorAll('.modal.active')
-  modals.forEach(modal => {
-    closeModal(modal)
-  })
-})
-
-closeModalButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const modal = button.closest('.modal')
-    closeModal(modal)
-  })
-})
-
-function openModal(modal) {
-  if (modal == null) return
-  modal.classList.add('active')
-  overlay.classList.add('active')
-}
-
-function closeModal(modal) {
-  if (modal == null) return
-  modal.classList.remove('active')
-  overlay.classList.remove('active')
-}
-</script>
-
   <head>
+    <title>File Transfer App</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- preload -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
     <!-- Moralis SDK code -->
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
-    
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  </head>
+ 
+  <body>
     <div class="header">
       <img src="msafe.png" alt="logo" />
-      <h1>&nbsp IPFS File Transfer</h1><br><br><br><br><br>
+      <h1>IPFS File Transfer</h1><br><br><br><br><br>
     </div>
-    </head>
-  
-  <div class="mainForm" id="mainForm">
-  <body>
-    
-    <!-- Login button voor metamask niet perse nodig, is automatisch nu -->
-    <!-- <button style=background-color:orangered id="btn-login">Login with Metamask</button><br><br> -->
-    <label for="name">Name:</label><br>
-    <input type="text" name="metadataName" id="metadataName"><br><br>
-    <label for="name">Message:</label><br>
-    <textarea name="metadataDescription" id="metadataDescription" cols="21" rows="5" placeholder="Type here"></textarea><br><br>
-    <!-- <input type="file" name="fileInput" id="fileInput"><br><br> -->
-    <!-- <button style=background-color:green onclick=send()>send</button> -->
-  
-    <div class="dropContainer" id="dropContainer">
-      Drop your file here
-    </div><br>
-      File:
-    <input type="file" name="fileInput" id="fileInput" /><br><br>
 
-    <button class="cybr-btn"onclick=send()>
-      Create hash<span aria-hidden>_</span>
-      <span aria-hidden class="cybr-btn__glitch">mSafe_</span>
-      <span aria-hidden class="cybr-btn__tag">V0.1</span>
-    </button>
+<!-- encrypt message -->
+<div class="encryptMessage"> 
+  <div class=container>
+    <div class="divTablefullwidth">
+      <div class="divTableBody">
+        <div class="divTableRow">
 
-    <!-- <button style=background-color:green onclick=send()>Create hash</button> -->
+          <div class="divTableCell" style="float: right;">
+            <h1><br><br><br>
+            <button id="btnDivEncrypt" onClick="javascript:switchdiv('encrypt');">Encrypt a File</button>
+            <button id="btnDivDecrypt" onClick="javascript:switchdiv('decrypt');">Decrypt a File</button>
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-    <script>
-    dropContainer.ondragover = dropContainer.ondragenter = function(evt) {
-      evt.preventDefault();
-    };
+  <div class=container>
+    <hr>
+  </div>
 
-    dropContainer.ondrop = function(evt) {
-    // not compatible with IE :(
-      fileInput.files = evt.dataTransfer.files;
+  <div class="container" id=divEncryptfile>
+    <h2>Encrypt a File</h2><br>
 
-    const dT = new DataTransfer();
-    dT.items.add(evt.dataTransfer.files[0]);
-    dT.items.add(evt.dataTransfer.files[3]);
-    fileInput.files = dT.files;
+    <div class="divTable">
+      <div class="divTableBody">
+        <div class="divTableRow">
+          <div class="divTableCell">Password</div>
+          <div class="divTableCell"><input id=txtEncpassphrase type=password size=30 onkeyup=javascript:encvalidate(); value=''></div>
+          <div class="divTableCell">(minumum length eight characters)</div>
+        </div>
+        <div class="divTableRow"><br>
+          <div class="divTableCell">Wachtwoord opnieuw intypen</div>
+          <div class="divTableCell"><input id=txtEncpassphraseretype type=password size=30 onkeyup=javascript:encvalidate(); value=''></div>
+          <div class="divTableCell"><span class=greenspan id=spnCheckretype></span></div>
+        </div>
+      </div>
+    </div>
 
-    evt.preventDefault();
-  };
+    <div>
+      <div class=dropzone id="encdropzone" ondrop="drop_handler(event);" ondragover="dragover_handler(event);" ondragend="dragend_handler(event);">
+        <a onclick=javascript:encfileElem.click();>FILE DROP BOX!</a>
+        <p><span id=spnencfilename></span></p>
+      </div>
+      <input type="file" id="encfileElem" style="display:none" onchange="selectfile(this.files)">
+    </div>
 
-      // connect to Moralis server
-      const serverUrl = "https://rkrmvjgt02d8.usemoralis.com:2053/server";
-      const appId = "5DKM4WVSui4kf4BaTRzeqRroHnwROLb5VJXtVAda";
-      Moralis.start({ serverUrl, appId });
+    <div class="divTable">
+      <div class="divTableBody">
+        <div class="divTableRow">
+          <div class="divTableCell"><button id=btnEncrypt onclick=javascript:encryptfile(); disabled>Encrypt File</button></div>
+          <div class="divTableCell"><span id=spnEncstatus></span></div>
+        </div>
+      </div>
+    </div>
 
-      Moralis.authenticate({signingMessage:"Login succesful"})
-
-      //login
-      login = async () => {
-        Moralis.Web3.authenticate().then(function (user){
-          console.log('logged in');
-      })
-    }
-
-      //upload
-      uploadFile = async () => {
-        const data = fileInput.files[0]
-        const file = new Moralis.File(data.name, data)
-        await file.saveIPFS();
-        return file.ipfs()
-        console.log(file.ipfs(), file.hash());
-      }
-
-      //upload metadata object
-      uploadMetadata = async (fileURL) =>{
-        
-        //niet perse nodig
-        // const name = document.getElementById('metadataName').value;
-        // const description = document.getElementById('metadataDescription').value;
-
-        const metadata = {
-          // optionele metadata, veroorzaakt meer clicks
-          // "name" : name,
-          // "description" : description,
-          "file" : fileURL
-        }
-
-        const file = new Moralis.File("file.json", {base64 : btoa(JSON.stringify(metadata))});
-        await file.saveIPFS();
-        
-        window.alert("Press okay to see the shareable link");
-        // document.write(file.ipfs());
-
-        var hashlink = file.ipfs();
-        document.body.appendChild(document.createElement('p'));
-        document.querySelector("body p:last-child").id = "jstext";
-        document.querySelector("#jstext").innerHTML = hashlink;
+    <div>
+      <a id=aEncsavefile hidden><button>Save Encrypted File</button></a>
+    </div>
   
-      }
+  </div>
 
-      //function send
-      send = async () => {
-        const document = await uploadFile();
-        await uploadMetadata(document);
-      }
+  <div class="container" id=divDecryptfile>
+    <h2>Decrypt a File</h2>
+    
+    <div class="divTable">
+      <div class="divTableBody">
+        <div class="divTableRow">
+          <div class="divTableCell">Password</div>
+          <div class="divTableCell"><input id=txtDecpassphrase type=password size=30 onkeyup=javascript:decvalidate(); value=''></div>
+        </div>
+      </div>
+    </div>
 
-    </script>
+    <div>
+        <div class=dropzone  id="decdropzone" ondrop="drop_handler(event);" ondragover="dragover_handler(event);" ondragend="dragend_handler(event);"><br><br><br><br>
+          <a role=button onclick=javascript:decfileElem.click();>FILE DROP BOX!</a>
+          <p><span id=spndecfilename></span></p>
+        </div>
+        <input type="file" id="decfileElem" style="display:none" onchange="selectfile(this.files)">
+    </div>
+
+    <div class="divTable">
+      <div class="divTableBody">
+        <div class="divTableRow">
+          <div class="divTableCell"><button id=btnDecrypt onclick=javascript:decryptfile(); disabled>Decrypt File</button></div>
+          <div class="divTableCell"><span id=spnDecstatus></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a id=aDecsavefile hidden><button>Save Decrypted File</button></a>
+    </div>
+  
+  </div>
+</div>
+
+<!-- File transfer -->
+  <div class="application">
+    <div class="mainForm" id="mainForm">
+      <label for="name">Name:</label><br>
+      <input type="text" name="metadataName" id="metadataName"><br><br>
+      <label for="name">Message:</label><br>
+      <textarea name="metadataDescription" id="metadataDescription" cols="21" rows="5" placeholder="Type here"></textarea><br><br>
+
+      <div class="dropContainer" id="dropContainer">
+        Drop your file here
+      </div><br>
+        File: <input type="file" name="fileInput" id="fileInput" /><br><br>
+
+        <button class="btn" onclick=send()>Create Hash</button>
+    </div>
+  </div>
+
+</div>
 
   </body>
+
+  <script src="encrypt.js"></script>
+
+  <!-- Include the AES algorithm of the crypto library -->
+	<script src="aes.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 </html>
+
+<script src="passgen.js"></script>
+<script src="app.js"></script> 
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <!-- <script>
+      var encodedString;
+      function encrypt(){
+          var baseString=document.getElementById("en").value;
+          encodedString=window.btoa(baseString);
+          document.getElementById("de").value=encodedString;
+      }
+      function decrypt(){
+          var decodedString=window.atob(encodedString);
+          document.getElementById("de").value=decodedString;
+      }
+  </script> -->
+  <!-- <h2>Encrypt link</h2> -->
+  <!-- <label for="Encrypt">encrypt: </label>
+  <input type="text" id="en"><br><br>
+  <button onclick="encrypt()">Encrypt</button><br><br>
+  <label for="Decrypt">decrypt:</label>
+  <input type="text" id="de"><br><br>
+  
+  <button onclick="decrypt()">Decrypt</button> -->

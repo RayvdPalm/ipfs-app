@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>File Transfer App</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- preload -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Moralis SDK code -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  </head>
+ 
+  <body>
+    <div class="header">
+      <img src="msafe.png" alt="logo" />
+      <h1>IPFS File Transfer</h1><br><br><br><br><br>
+    </div>
+
+<!-- encrypt message -->
+<div class="encryptMessage"> AAAAAAAAAAAAAAAAAAAAAAAAAAAAH
+  <hr>
+
+  <div class="container" id=divEncryptfile>
+
+    <div>
+      <div class=dropzone id="encdropzone" ondrop="drop_handler(event);" ondragover="dragover_handler(event);" ondragend="dragend_handler(event);">
+        <a onclick=javascript:encfileElem.click();>FILE DROP BOX</a>
+        <p><span id=spnencfilename></span></p>
+      </div>
+      <input type="file" id="encfileElem" style="display:none" onchange="selectfile(this.files)">
+    </div>
+
+    <!-- <div class="divTableCell"><button id=btnEncrypt onclick=javascript:encryptfile(); disabled>Encrypt File</button></div> -->
+    <div class="divTableCell"><span id=spnEncstatus></span></div>
+
+    <!-- <div>
+      <a id=aEncsavefile ><button>Save Encrypted File</button></a>
+    </div> -->
+  
+  </div>
+ 
+    <button class="btn" onclick=send()>Create Hash</button>
+
+  </div>
+</div>
+
+</body>
+
+<script src="encrypt.js"></script>
+
+<!-- Include the AES algorithm of the crypto library -->
+<script src="aes.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="script.js"></script>
+<script src="passgen.js"></script>
+
+</html>

@@ -17,7 +17,6 @@ label{
     width: 100px;
     height: 100px;
     background: transparent;
-    
 }
 
 h1 {
@@ -46,7 +45,7 @@ body {
 }
 
 .mainForm{
-    background-image: url(cloud.gif);
+    background-color: #1878BD;
     background-repeat: repeat;
     background-position-y: center;
     background-position-x: center;
